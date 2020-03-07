@@ -26,6 +26,10 @@ interpreter::factory_map {
    {"polygon"  , &interpreter::make_polygon  },
    {"rectangle", &interpreter::make_rectangle},
    {"square"   , &interpreter::make_square   },
+   {"triange"   , &interpreter::make_triangle },
+   {"diamond"   , &interpreter::make_diamond }
+
+
 };
 
 interpreter::shape_map interpreter::objmap;
@@ -86,26 +90,73 @@ shape_ptr interpreter::make_text (param begin, param end) {
 
 shape_ptr interpreter::make_ellipse (param begin, param end) {
    DEBUGF ('f', range (begin, end));
-   return make_shared<ellipse> (GLfloat(), GLfloat());
+   return make_shared<ellipse> (GLfloat(stof(begin[0])), 
+                                GLfloat(stof(begin[1])));
 }
 
 shape_ptr interpreter::make_circle (param begin, param end) {
    DEBUGF ('f', range (begin, end));
-   return make_shared<circle> (GLfloat());
+   return make_shared<circle> (GLfloat(stof(begin[0])));
 }
 
 shape_ptr interpreter::make_polygon (param begin, param end) {
    DEBUGF ('f', range (begin, end));
-   return make_shared<polygon> (vertex_list());
+   vertex_list list;
+   int count =0;
+   for(auto it=begin;it!=end;++it) count++;
+   if(count%2!=0) throw runtime_error 
+      ("usage: polygon, number of args");
+   
+   while(begin!=end){
+      list.push_back({GLfloat(stof(begin[0])), 
+         GLfloat(stof(begin[1]))});
+      //increament by 2
+      begin++;
+      begin++;
+   }
+   return make_shared<polygon> (list);
 }
 
 shape_ptr interpreter::make_rectangle (param begin, param end) {
    DEBUGF ('f', range (begin, end));
-   return make_shared<rectangle> (GLfloat(), GLfloat());
+   if(begin == end) throw runtime_error ("usage: rectangle, number of args");
+   return make_shared<rectangle> (GLfloat(stof(begin[0])), 
+                                  GLfloat(stof(begin[1])));
 }
 
 shape_ptr interpreter::make_square (param begin, param end) {
    DEBUGF ('f', range (begin, end));
-   return make_shared<square> (GLfloat());
+   if(begin == end) throw runtime_error ("usage: square, number of args");
+   return make_shared<square> (GLfloat(stof(begin[0])));
 }
+
+shape_ptr interpreter::make_triangle (param begin, param end) {
+   DEBUGF ('f', range (begin, end));
+   vertex_list list;
+   int count =0;
+   for(auto it=begin;it!=end;++it) count++;
+   if(count%2!=0) throw runtime_error ("usage: triangle, number of args");
+   
+   while(begin!=end){
+      list.push_back({GLfloat(stof(begin[0])), GLfloat(stof(begin[1]))});
+      //increament by 2
+      begin++;
+      begin++;
+   }
+   return make_shared<triangle> (list);
+}
+
+shape_ptr interpreter::make_diamond (param begin, param end) {
+   DEBUGF ('f', range (begin, end));
+   if(begin == end) throw runtime_error ("usage: diamond, number of args");
+   return make_shared<diamond> (GLfloat(stof(begin[0])),
+                                GLfloat(stof(begin[1])));
+}
+
+shape_ptr interpreter::make_equilateral (param begin, param end) {
+   DEBUGF ('f', range (begin, end));
+   return make_shared<equilateral> (GLfloat(stof(begin[0])));
+}
+
+
 

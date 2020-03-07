@@ -1,5 +1,3 @@
-// $Id: shape.cpp,v 1.2 2019-02-28 15:24:20-08 - - $
-
 #include <typeinfo>
 #include <unordered_map>
 #include <cmath>
@@ -66,15 +64,28 @@ square::square (GLfloat width): rectangle (width, width) {
    DEBUGF ('c', this);
 }
 
+triangle::triangle (const vertex_list& vertices_): polygon(vertices_) {
+   DEBUGF ('c', this);
+}
+
+equilateral::equilateral(const GLfloat width): triangle(
+    {{0,0}, {width / 2, width}, {width,0}}) {
+    DEBUGF ('c', this);
+}
+
+diamond::diamond(const GLfloat width, const GLfloat height): polygon(
+    {{0,0}, {width / 2, width}, {width,0}}) {
+    DEBUGF ('c', this);
+}
+
 void text::draw (const vertex& center, const rgbcolor& color) const {
    DEBUGF ('d', this << "(" << center << "," << color << ")");
 }
 
 void ellipse::draw (const vertex& center, const rgbcolor& color) const {
-      DEBUGF ('d', "here");
+   //step of 100
+   const GLfloat theta = 2.0 * M_PI / 100;
 
-   int points = 60;
-   const GLfloat theta = 2.0 * M_PI / points;
    glBegin(GL_POLYGON);
    glEnable (GL_LINE_SMOOTH);
    glColor3ubv(color.ubvec);
@@ -88,6 +99,13 @@ void ellipse::draw (const vertex& center, const rgbcolor& color) const {
 }
 
 void polygon::draw (const vertex& center, const rgbcolor& color) const {
+   glBegin (GL_POLYGON);
+   glColor3ubv (color.ubvec);
+   for(auto vertex: vertices) {
+       glVertex2f (vertex.xpos + center.xpos,
+                   vertex.ypos + center.ypos);
+   }
+   glEnd();
    DEBUGF ('d', this << "(" << center << "," << color << ")");
 }
 
