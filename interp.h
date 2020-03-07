@@ -46,6 +46,8 @@ class interpreter {
       static shape_ptr make_triangle (param begin, param end);
       static shape_ptr make_diamond (param begin, param end);
       static shape_ptr make_equilateral (param begin, param end);
+      static void check_error(param begin, param end, int size=-1);
+
 };
 
 #endif

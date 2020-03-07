@@ -56,7 +56,8 @@ polygon::polygon (const vertex_list& vertices_): vertices(vertices_) {
 }
 
 rectangle::rectangle (GLfloat width, GLfloat height):
-            polygon({}) {
+            polygon({{width, height}, {width, 0}, {0,0}, 
+                    {0, height}}){
    DEBUGF ('c', this << "(" << width << "," << height << ")");
 }
 
@@ -73,8 +74,9 @@ equilateral::equilateral(const GLfloat width): triangle(
     DEBUGF ('c', this);
 }
 
-diamond::diamond(const GLfloat width, const GLfloat height): polygon(
-    {{0,0}, {width / 2, width}, {width,0}}) {
+diamond::diamond(const GLfloat width, const GLfloat height):
+    polygon({{0,0}, {width/2, height/2}, 
+                    {width, 0}, {width/2, 0 - height/2}}) {
     DEBUGF ('c', this);
 }
 
