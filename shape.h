@@ -42,7 +42,11 @@ class shape {
       shape (shape&&) = delete; // Prevent moving.
       shape& operator= (shape&&) = delete; // Prevent moving.
       virtual ~shape() {}
-      virtual void draw (const vertex&, const rgbcolor&) const = 0;
+      virtual void draw (const vertex&, const rgbcolor&, int i) const = 0;
+      virtual void draw_border (const vertex&, const rgbcolor&) const = 0;
+      static void draw_number(const vertex& center, const rgbcolor& color, int i);
+
+
       virtual void show (ostream&) const;
 };
 
@@ -52,7 +56,8 @@ class text: public shape {
       string textdata;
    public:
       text (void* glut_bitmap_font, const string& textdata);
-      virtual void draw (const vertex&, const rgbcolor&) const override;
+      virtual void draw (const vertex&, const rgbcolor&, int i) const override;
+      virtual void draw_border (const vertex&, const rgbcolor&) const override;
       virtual void show (ostream&) const override;
 };
 
@@ -62,7 +67,8 @@ class ellipse: public shape {
       vertex dimension;
    public:
       ellipse (GLfloat width, GLfloat height);
-      virtual void draw (const vertex&, const rgbcolor&) const override;
+      virtual void draw (const vertex&, const rgbcolor&, int i) const override;
+      virtual void draw_border (const vertex&, const rgbcolor&) const override;
       virtual void show (ostream&) const override;
 };
 
@@ -76,7 +82,8 @@ class polygon: public shape {
       const vertex_list vertices;
    public:
       polygon (const vertex_list& vertices);
-      virtual void draw (const vertex&, const rgbcolor&) const override;
+      virtual void draw (const vertex&, const rgbcolor&, int i) const override;
+      virtual void draw_border (const vertex&, const rgbcolor&) const override;
       virtual void show (ostream&) const override;
 };
 

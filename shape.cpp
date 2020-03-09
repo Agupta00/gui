@@ -5,6 +5,7 @@
 using namespace std;
 
 #include "shape.h"
+#include "graphics.h"
 #include "util.h"
 
 static unordered_map<void*,string> fontname {
@@ -56,9 +57,8 @@ polygon::polygon (const vertex_list& vertices_): vertices(vertices_) {
 }
 
 rectangle::rectangle (GLfloat width, GLfloat height):
-            polygon({{width, height}, {width, 0}, {0,0}, 
-                    {0, height}}){
-   DEBUGF ('c', this << "(" << width << "," << height << ")");
+    polygon({{width, height}, {width, 0}, {0,0}, {0, height}}){
+    DEBUGF ('c', this << "(" << width << "," << height << ")");
 }
 
 square::square (GLfloat width): rectangle (width, width) {
@@ -76,31 +76,89 @@ equilateral::equilateral(const GLfloat width): triangle(
 
 diamond::diamond(const GLfloat width, const GLfloat height):
     polygon({{0,0}, {width/2, height/2}, 
-                    {width, 0}, {width/2, 0 - height/2}}) {
+            {width, 0}, {width/2, 0-height/2}}) {
     DEBUGF ('c', this);
 }
 
-void text::draw (const vertex& center, const rgbcolor& color) const {
+void text::draw (const vertex& center, const rgbcolor& color, int i) const {
+   const GLubyte* name = reinterpret_cast<const GLubyte*> (textdata.c_str());
+   glColor3ubv (color.ubvec);
+   glRasterPos2f (center.xpos, center.ypos);
+   glutBitmapString (glut_bitmap_font, name);
+
    DEBUGF ('d', this << "(" << center << "," << color << ")");
 }
 
-void ellipse::draw (const vertex& center, const rgbcolor& color) const {
-   //step of 100
-   const GLfloat theta = 2.0 * M_PI / 100;
+void text::draw_border (const vertex& center, const rgbcolor& color) const {
+  const GLubyte* name = reinterpret_cast<const GLubyte*> (textdata.c_str());
+  int length = glutBitmapLength (glut_bitmap_font, name);
+  int height = glutBitmapHeight (glut_bitmap_font);
 
+   glColor3ubv(window::border_color.ubvec);
+   glLineWidth(window::border_width);
+   glBegin(GL_LINE_LOOP);
+
+   int width= window::border_width;
+   length+=width;
+   height+=width;
+
+   int padding = 5;
+   glVertex2f(center.xpos-padding, center.ypos-padding);
+   glVertex2f(center.xpos+length+padding, center.ypos-padding);
+   glVertex2f(center.xpos+length+padding, center.ypos+height/2+padding);
+   glVertex2f(center.xpos-padding, center.ypos+height/2+padding);  
+   glEnd();
+
+}
+
+void ellipse::draw (const vertex& center, const rgbcolor& color, int i) const {
+
+   const GLfloat delta = 2 * M_PI / 64;
+
+
+   shape::draw_number(center, color, i);
    glBegin(GL_POLYGON);
    glEnable (GL_LINE_SMOOTH);
    glColor3ubv(color.ubvec);
-   for (GLfloat point = 0; point < 2.0 * M_PI; point += theta) {
-      glVertex2f (dimension.xpos/2 * cos(point) + center.xpos,
-                  dimension.ypos/2 * sin(point) + center.ypos);
+   for (GLfloat point = 0; point < 2 * M_PI; point += delta) {
+      glVertex2f (dimension.xpos * cos(point) + center.xpos,
+                  dimension.ypos * sin(point) + center.ypos);
    }
    glEnd();
    DEBUGF ('d', this << "(" << center << "," << color << ")");
 
 }
 
-void polygon::draw (const vertex& center, const rgbcolor& color) const {
+void ellipse::draw_border(const vertex& center, const rgbcolor& color) const {
+   
+   const GLfloat delta = 2 * M_PI / 64;
+
+   glLineWidth(window::border_width);
+   glBegin(GL_LINE_LOOP);
+   glEnable(GL_LINE_SMOOTH);
+   glColor3ubv(window::border_color.ubvec);
+
+
+   for (GLfloat point = 0; point < 2 * M_PI; point += delta) {
+      glVertex2f (dimension.xpos * cos(point) + center.xpos,
+                  dimension.ypos * sin(point) + center.ypos);
+   }
+   glEnd();
+}
+
+void polygon::draw (const vertex& center, const rgbcolor& color, int i) const {
+
+  //center of polygon
+  GLfloat x;
+  GLfloat y;
+  for(auto vertex: vertices) {
+    x+=vertex.xpos;
+    y+=vertex.ypos;
+  }
+  vertex cm{center.xpos + x/(vertices.size()),center.ypos + y/(vertices.size())};
+
+
+   shape::draw_number(cm, color, i);
    glBegin (GL_POLYGON);
    glColor3ubv (color.ubvec);
    for(auto vertex: vertices) {
@@ -111,6 +169,28 @@ void polygon::draw (const vertex& center, const rgbcolor& color) const {
    DEBUGF ('d', this << "(" << center << "," << color << ")");
 }
 
+void polygon::draw_border (const vertex& center, const rgbcolor& color) const {
+  glLineWidth(window::border_width);
+  glBegin(GL_LINE_LOOP);
+  glEnable(GL_LINE_SMOOTH);
+  glColor3ubv(window::border_color.ubvec);
+
+  for(auto vertex: vertices) {
+       glVertex2f (vertex.xpos + center.xpos,
+                   vertex.ypos + center.ypos);
+   }
+   glEnd();
+}
+
+void shape::draw_number(const vertex& center, const rgbcolor& color, int i) {
+  const GLubyte* num = reinterpret_cast<const GLubyte*> (to_string(i).c_str());
+
+
+  rgbcolor inverted = rgbcolor(255.0-color.ubvec[0],255.0-color.ubvec[1],255.0-color.ubvec[2]);
+  glColor3ubv (inverted.ubvec);
+  glRasterPos2f (center.xpos, center.ypos);
+  glutBitmapString (GLUT_BITMAP_HELVETICA_18, num);
+}
 void shape::show (ostream& out) const {
    out << this << "->" << demangle (*this) << ": ";
 }

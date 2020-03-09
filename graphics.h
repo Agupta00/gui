@@ -19,7 +19,8 @@ class object {
    public:
       vertex center;
       object (shared_ptr<shape>, vertex, rgbcolor);
-      void draw();
+      void draw(int i);
+      void draw_border();
       void move (GLfloat delta_x, GLfloat delta_y);
 };
 
@@ -45,8 +46,8 @@ class window {
       static int width;         // in pixels
       static int height;        // in pixels
       static vector<object> objects;
-      static size_t selected_obj;
       static mouse mus;
+
    private:
       static void close();
       static void entry (int mouse_entered);
@@ -62,7 +63,15 @@ class window {
                   objects.push_back (obj); }
       static void setwidth (int width_) { width = width_; }
       static void setheight (int height_) { height = height_; }
+      static void move_selected_object(GLfloat delta_x, GLfloat delta_y );
+      static void select_object(int i);
       static void main();
+      static int border_width;
+      static rgbcolor border_color;
+      static int move_by;
+      static size_t selected_obj;
+
+
 };
 
 #endif
