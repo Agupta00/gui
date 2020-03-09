@@ -90,6 +90,13 @@ void window::display() {
 
    int i =0;
    for (auto& object: window::objects){
+      //check if out of window
+      if(object.center.xpos>window::width) object.center.xpos=0;
+      else if(object.center.xpos<0) object.center.xpos=window::width;
+
+      if(object.center.ypos>window::height) object.center.ypos=0;
+      else if(object.center.ypos<0) object.center.ypos=window::height;
+
       object.draw(i);
       i++;
 
